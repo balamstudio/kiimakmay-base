@@ -20,19 +20,19 @@
 
 // ** MySQL settings - You can get this info from your web host ** //
 /** The name of the database for WordPress */
-define( 'DB_NAME', 'kiimak_base' );
+define('DB_NAME', 'shop_builder');
 
 /** MySQL database username */
-define( 'DB_USER', 'balam_admin' );
+define('DB_USER', 'root');
 
 /** MySQL database password */
-define( 'DB_PASSWORD', 'Balampassword' );
+define('DB_PASSWORD', 'rootme');
 
 /** MySQL hostname */
 define( 'DB_HOST', 'localhost' );
 
 /** Database Charset to use in creating database tables. */
-define( 'DB_CHARSET', 'utf8mb4' );
+define('DB_CHARSET', 'utf8');
 
 /** The Database Collate type. Don't change this if in doubt. */
 define( 'DB_COLLATE', '' );
@@ -85,6 +85,14 @@ define( 'WP_DEBUG', false );
 if ( ! defined( 'ABSPATH' ) ) {
 	define( 'ABSPATH', __DIR__ . '/' );
 }
+
+/* ADDED BY ZONAIT */
+ini_set('display_errors','Off');
+ini_set('error_reporting', 'E_ALL & ~E_NOTICE & ~E_STRICT & ~E_DEPRECATED & ~E_WARNING' );
+define('WP_DEBUG', false);
+define('WP_DEBUG_DISPLAY', false);
+define('WP_MEMORY_LIMIT', '1024M' );
+define('WP_CACHE', true);
 
 /** Sets up WordPress vars and included files. */
 require_once ABSPATH . 'wp-settings.php';
