@@ -596,3 +596,54 @@ function my_admin_title($admin_title, $title)
 
 
 add_filter('display_post_states', '__return_false');
+
+
+
+if ( ! function_exists( 'et_show_cart_total' ) ) {
+	function et_show_cart_total( $args = array() ) {
+		if ( ! class_exists( 'woocommerce' ) || ! WC()->cart ) {
+			return;
+		}
+
+		$defaults = array(
+			'no_text' => false,
+		);
+
+		$args = wp_parse_args( $args, $defaults );
+
+		$items_number = WC()->cart->get_cart_contents_count();
+
+		$url = function_exists( 'wc_get_cart_url' ) ? wc_get_cart_url() : WC()->cart->get_cart_url();
+
+		printf(
+			'<a href="%1$s" class="et-cart-info">
+				<span>%2$s</span>
+			</a>',
+			esc_url( $url ),
+			( ! $args['no_text']
+				? esc_html( sprintf(
+					_nx( '%1$s Elemento', '%1$s Elementos', $items_number, 'WooCommerce items number', 'Divi' ),
+					number_format_i18n( $items_number )
+				) )
+				: ''
+			)
+		);
+		
+	}
+}
+
+// Actualiza mini carrito
+function es_fresh_cart_fragments($fragments)
+{
+    ob_start();
+    et_show_cart_total();
+    $cart_total_html = ob_get_clean();
+ 
+    $fragments['.et-cart-info'] = $cart_total_html;
+ 
+    return $fragments;
+}
+ 
+add_filter('woocommerce_add_to_cart_fragments', 'es_fresh_cart_fragments', 10, 1);
+
+
