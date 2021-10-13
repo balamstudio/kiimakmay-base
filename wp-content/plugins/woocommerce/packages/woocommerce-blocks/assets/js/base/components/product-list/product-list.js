@@ -17,7 +17,6 @@ import {
 import withScrollToTop from '@woocommerce/base-hocs/with-scroll-to-top';
 import { useInnerBlockLayoutContext } from '@woocommerce/shared-context';
 import { speak } from '@wordpress/a11y';
-import { getSetting } from '@woocommerce/settings';
 
 /**
  * Internal dependencies
@@ -53,16 +52,11 @@ const generateQuery = ( { sortValue, currentPage, attributes } ) => {
 		}
 	};
 
-	const hideOutOfStockItems = getSetting( 'hideOutOfStockItems', false );
-
 	return {
 		...getSortArgs( sortValue ),
 		catalog_visibility: 'catalog',
 		per_page: columns * rows,
 		page: currentPage,
-		...( hideOutOfStockItems && {
-			stock_status: [ 'instock', 'onbackorder' ],
-		} ),
 	};
 };
 
@@ -76,8 +70,8 @@ const generateQuery = ( { sortValue, currentPage, attributes } ) => {
  */
 
 const extractPaginationAndSortAttributes = ( query ) => {
-	/* eslint-disable-next-line no-unused-vars, camelcase */
-	const { order, orderby, page, per_page, ...totalQuery } = query;
+	/* eslint-disable-next-line no-unused-vars */
+	const { order, orderby, page, per_page: perPage, ...totalQuery } = query;
 	return totalQuery || {};
 };
 
@@ -117,6 +111,18 @@ const ProductList = ( {
 	sortValue,
 	scrollToTop,
 } ) => {
+	// These are possible filters.
+	const [ productAttributes, setProductAttributes ] = useQueryStateByKey(
+		'attributes',
+		[]
+	);
+	const [ productStockStatus, setProductStockStatus ] = useQueryStateByKey(
+		'stock_status',
+		[]
+	);
+	const [ minPrice, setMinPrice ] = useQueryStateByKey( 'min_price' );
+	const [ maxPrice, setMaxPrice ] = useQueryStateByKey( 'max_price' );
+
 	const [ queryState ] = useSynchronizedQueryState(
 		generateQuery( {
 			attributes,
@@ -130,14 +136,6 @@ const ProductList = ( {
 	const { parentClassName, parentName } = useInnerBlockLayoutContext();
 	const totalQuery = extractPaginationAndSortAttributes( queryState );
 	const { dispatchStoreEvent } = useStoreEvents();
-
-	// These are possible filters.
-	const [ productAttributes, setProductAttributes ] = useQueryStateByKey(
-		'attributes',
-		[]
-	);
-	const [ minPrice, setMinPrice ] = useQueryStateByKey( 'min_price' );
-	const [ maxPrice, setMaxPrice ] = useQueryStateByKey( 'max_price' );
 
 	// Only update previous query totals if the query is different and the total number of products is a finite number.
 	const previousQueryTotals = usePrevious(
@@ -205,6 +203,7 @@ const ProductList = ( {
 	const hasProducts = products.length !== 0 || productsLoading;
 	const hasFilters =
 		productAttributes.length > 0 ||
+		productStockStatus.length > 0 ||
 		Number.isFinite( minPrice ) ||
 		Number.isFinite( maxPrice );
 
@@ -220,6 +219,7 @@ const ProductList = ( {
 				<NoMatchingProducts
 					resetCallback={ () => {
 						setProductAttributes( [] );
+						setProductStockStatus( [] );
 						setMinPrice( null );
 						setMaxPrice( null );
 					} }

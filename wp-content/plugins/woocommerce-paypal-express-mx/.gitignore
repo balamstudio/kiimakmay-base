@@ -1,5 +1,0 @@
-*.zip
-composer.lock
-logs/20*
-includes/cert/key_data.pem
-
